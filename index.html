@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--scaling for phones-->
+    <script src="https://kit.fontawesome.com/4616ff3f2d.js" crossorigin="anonymous"></script> <!--font awesome kit-->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <!--supabase api-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet"> <!--font family-->
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/logo.png"/> <!--favion-->
+    <title>Neighborhood Bike Repair</title>
+</head>
+<body>
+    <style>
+        :root {
+            --accentbg: #00CE79;
+        }
+        *::-webkit-scrollbar {
+            width: 16px;
+            background-color: #242424;
+            transition: 0.3s all ease;
+        }
+        *::-webkit-scrollbar-thumb {
+            border-radius: 40px;
+            border: 4px solid transparent;
+            background-clip: content-box;
+            background-color: grey;
+            transition: 0.3s all ease;
+        }
+        * {
+            font-family: "Figtree", Arial, sans-serif;
+            margin: 0px;
+            transition: 0.3s all ease, background-color 0.6s ease;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+        body {
+            background-color: #141414;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        .button {
+            display: inline-flex;
+            column-gap: 9px;
+            align-items: center;
+            position: relative;
+            width: fit-content;
+            height: fit-content;
+            cursor: pointer;
+            outline: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            padding: 11px 19px;
+            border-radius: 6px;
+            font-weight: 600;
+            user-select: none;
+        }
+        .header1 {
+            color: black;
+            font-size: 44px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        .header2 {
+            font-size: 30px;
+            font-weight: 700;
+            position: relative;
+            margin-top: -4px;
+            color: wheat;
+        }
+        .header3 {
+            font-size: 22px;
+            font-weight: 700;
+            position: relative;
+            margin-top: -2px;
+            color: wheat;
+            margin-bottom: 4px;
+        }
+        .content1 {
+            line-height: 1.2;
+            color: #141414;
+            font-size: 20px;
+            font-weight: 400;
+        }
+        .content2 {
+            color: #141414;
+            font-size: 16px;
+            font-weight: 400;
+        }
+        .meet-card {
+            cursor: pointer;
+            margin-top: 16px;
+            border-radius: 6px;
+            padding: 15px 18px;
+            background-color: #242424;
+            color: hsl(0, 0%, 60%);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+        }
+        #toast {
+            position: fixed;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            grid-gap: 16px;
+            justify-content: left;
+            align-items: center;
+            right: 24px;
+            top: 24px;
+            transform-origin: center;
+            transform: translateY(calc(-100% - 28px));
+            z-index: 99999999999999999999999999999999999999999999999999999999999999999999999;
+            padding: 10px;
+            font-size: 15px;
+            border-radius: 33px;
+            font-weight: 500;
+            user-select: none;
+            width: fit-content;
+            min-width: 20vw;
+            max-width: 40vw;
+            background-color: #363636;
+            color: white;
+        }
+        #toasticoncircle {
+            height: 30px;
+            width: 30px;
+            background-color: white;
+            color: black;
+            border-radius: 30px;
+            display: grid;
+            place-items: center;
+            transition: 0.1s all ease;
+        }
+        .widgets-wrapper {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(5, 100%);
+        }
+        .event-widget {
+            width: 100%;
+            height: fit-content;
+            padding: 0px 15vw;
+            padding-bottom: 40px;
+            position: relative;
+        }
+        .event-card {
+            padding: 36px 40px;
+            background-color: #242424;
+            border-radius: 6px;
+            display: grid;
+            grid-gap: 16px;
+            width: 100%;
+        }
+        .calendar-widget {
+            background-color: #242424;
+            border-radius: 6px;
+            width: 100%;
+            display: grid;
+            place-items: center;
+            padding: 35px 10px;
+        }
+        .time-widget {
+            background-color: #242424;
+            border-radius: 6px;
+            width: 100%;
+            display: grid;
+            grid-gap: 12px;
+            place-items: center;
+            padding: 35px;
+        }
+        .information-widget {
+            background-color: #242424;
+            border-radius: 6px;
+            width: 100%;
+            display: grid;
+            grid-gap: 12px;
+            place-items: center;
+            padding: 35px;
+        }
+        .complete-widget {
+            background-color: #242424;
+            border-radius: 6px;
+            width: 100%;
+            display: grid;
+            place-items: center;
+            padding: 35px;
+        }
+        .appointment-details-wrapper {
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            grid-gap: 12px;
+        }
+        .details {
+            font-size: 16px;
+            font-weight: 700;
+            background-color: #363636;
+            color: white;
+            border-radius: 6px;
+            padding: 20px 24px;
+            display: grid;
+            grid-gap: 15px;
+            place-items: center;
+        }
+        .infoform {
+            width: 70%;
+            max-width: 370px;
+        }
+        .label {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            margin-left: 1px;
+        }
+        .infoinput {
+            font-size: 16px;
+            background-color: #363636;
+            color: white;
+            padding: 11px 12px;
+            border-radius: 6px;
+            outline: none;
+            border: none;
+            width: 100%;
+            margin-bottom: 24px;
+            resize: vertical;
+            max-height: 300px;
+        }
+        #calendar {
+            width: fit-content;
+            display: grid;
+            grid-template-columns: repeat(7, min-content);
+        }
+        .timeslot {
+            width: fit-content;
+            margin: auto 6px;
+            display: grid;
+            grid-template-columns: 400px 0px;
+            grid-gap: 0px;
+            overflow: hidden;
+        }
+        .opentime {
+            font-size: 16px;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            background-color: var(--accentbg);
+            border-radius: 6px;
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .closedtime {
+            font-size: 16px;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            background-color: #363636;
+            border-radius: 6px;
+            padding: 20px;
+            cursor: default;
+            user-select: none;
+        }
+        .confirmtime {
+            font-size: 16px;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            background-color: #363636;
+            border-radius: 6px;
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .hidden {
+            height: 64px;
+            width: 64px;
+            pointer-events: none;
+            background-color: transparent;
+            color: transparent;
+            opacity: 0;
+        }
+        .open {
+            display: grid;
+            place-items: center;
+            height: 64px;
+            width: 64px;
+            font-weight: 700;
+            height: 64px;
+            width: 64px;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: var(--accentbg);
+            color: white;
+            margin: 0.5vw;
+            cursor: pointer;
+            user-select: none;
+        }
+        .closed {
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            height: 64px;
+            width: 64px;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #363636;
+            color: white;
+            margin: 0.5vw;
+            cursor: default;
+            pointer-events: none;
+            user-select: none;
+        }
+        .today {
+            position: relative;
+            display: grid;
+            place-items: center;
+            padding-bottom: 7px;
+            height: 64px;
+            width: 64px;
+            font-weight: 700;
+            height: 64px;
+            width: 64px;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #FBB0FF;
+            color: black;
+            margin: 0.5vw;
+            cursor: default;
+            user-select: none;
+            pointer-events: none;
+        }
+        .today:before {
+            content: "Today";
+            position: absolute;
+            font-size: 12px;
+            font-weight: 400;
+            left: 50%;
+            transform: translateX(-50%); 
+            bottom: 5px;
+        }
+        #calendar > span {
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            text-align: center;
+            margin-bottom: 0.8vw;
+            user-select: none;
+        }
+        #widgets-nav {
+            width: (100% - 30vw);
+            padding: 30px 0px;
+            margin: 0px 15vw;
+            position: relative;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            transform: translateY(calc(-100% - 10px));
+        }
+        .progress-wrapper {
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            width: 100%;
+            height: 6px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #widgets-progress {
+            position: relative;
+            width: 0%;
+            background-color: var(--accentbg);
+            height: 6px;
+            border-radius: 4px;
+        }
+        .loading {
+            width: 40vw !important;
+            animation: infinteprogress infinite 0.8s;
+            transition: linear;
+        }
+        @keyframes infinteprogress {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(70vw);
+            }
+        }
+    </style>
+
+    <div id="toast"> <!--toast for notifications-->
+        <div id="toasticoncircle">
+            <i id="toasticon" class="fa-solid fa-check"></i>
+        </div>
+        <div id="toastmessage">This is a test toast</div>
+        <div id="toasticoncircle" onclick="hidetoast()" style="background-color: #242424; color: white; cursor: pointer;">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+    </div>
+
+    <div id="widgets-nav"> <!--system navigation-->
+        <div class="button" style="background-color: var(--accentbg); color: white;" onclick="widgetsback()">
+            <i class="fa-solid fa-arrow-left"></i>
+            <div id="widget-nav-txt">Select a day</div>
+        </div>
+        <div></div>
+        <div class="button" style="background-color: #242424; color: white;">
+            <div id="widget-event-txt">At home</div>
+            <i class="fa-solid fa-location-dot"></i>
+        </div>
+        <div class="progress-wrapper">
+            <div id="widgets-progress"></div>
+        </div>
+    </div>
+    <div class="widgets-wrapper" id="widgets"> <!--div to hold all widgets-->
+        <div class="event-widget" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 40px; margin: 0px auto;">
+            <div class="event-card">
+                <div class="header2">At Your Home</div>
+                <div class="content2" style="color: white;">We come to your house and repair your bike(s). Traveling fee is $12 to $15 depending on your location.</div>
+                <div class="button" style="background-color: var(--accentbg); color: white; margin-top: 10px; padding: 11px 40px;" onclick="calendar('home')">Book</div>
+            </div>
+            <div class="event-card">
+                <div class="header2">At Our Garage</div>
+                <div class="content2" style="color: white;">Drop off your bike(s) at our house and pick them up at a later date.</div>
+                <div class="button" style="background-color: var(--accentbg); color: white; margin-top: 10px; padding: 11px 40px;" onclick="calendar('garage')">Book</div>
+            </div>
+        </div>
+        <div class="event-widget">
+            <div class="calendar-widget">
+                <div id="calendar"> <!--to be generated via loadcalendar script-->
+                </div>
+            </div>
+        </div>
+        <div class="event-widget">
+            <div class="time-widget" id="timewidget"> <!--to be generated via loadtime script-->
+                
+            </div>
+        </div>
+        <div class="event-widget">
+            <div class="information-widget">
+                <div class="content1" style="color: white; margin-bottom: 22px;" id="infoheader"></div>
+                <div class="infoform">
+                    <div class="label">Full name</div>
+                    <input type="text" class="infoinput" id="nameinput">
+                    <div class="label">Email address</div>
+                    <input type="email" class="infoinput" id="emailinput">
+                    <div class="label">Phone number</div>
+                    <input type="text" class="infoinput" id="phoneinput">
+                    <div id="addressform"> <!--hidden or revealed depending on appointment type-->
+                        <div class="label">Your address</div>
+                        <input type="text" class="infoinput" id="addressinput">
+                    </div>
+                    <div class="label">Comments</div>
+                    <textarea class="infoinput" style="height: 100px;" id="commentsinput"></textarea>
+                    <div class="button" style="background-color: var(--accentbg); color: white; margin-top: 10px; padding: 11px 40px;" onclick="bookevent()">Book</div>
+                </div>
+            </div>
+        </div>
+        <div class="event-widget">
+            <div class="complete-widget">
+                <div class="header2" style="color: white; margin-bottom: 10px;">Appointment Booked</div>
+                <div class="content2" style="color: white; margin-bottom: 48px; text-transform: capitalize;" id="complete-header">Thanks, Noah Crozier</div>
+                <div class="appointment-details-wrapper">
+                    <div class="details">
+                        <i class="fa-regular fa-compass"></i>
+                        <div id="complete-type"></div> <!--info added in book_event script-->
+                    </div>
+                    <div class="details">
+                        <i class="fa-regular fa-clock"></i>
+                        <div id="complete-time"></div> <!--info added in book_event script-->
+                    </div>
+                    <div class="details">
+                        <i class="fa-regular fa-calendar"></i>
+                        <div id="complete-date"></div> <!--info added in book_event script-->
+                    </div>
+                    <div class="details" style="grid-column: span 3; text-align: left; place-items: flex-start;" id="details-comments">
+                        Comments<br>
+                        <div id="complete-comments" style="width: 100%; font-weight: 400;"></div>
+                    </div>
+                </div>
+                <div class="button" style="background-color: var(--accentbg); color: white; margin-top: 48px; padding: 11px 40px;" onclick="closecomplete()">Done</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        closetoast = "";
+        function toast(message, tone = "info") {
+            if (tone == "success") { // to change icon of toast
+                document.getElementById("toasticoncircle").style.backgroundColor = "#04aa6d";
+                document.getElementById("toasticoncircle").style.color = "white";
+                document.getElementById("toasticon").setAttribute("class", "fa-solid fa-check");
+            } else if (tone == "warning") {
+                document.getElementById("toasticoncircle").style.backgroundColor = "#ffaa2c";
+                document.getElementById("toasticoncircle").style.color = "white";
+                document.getElementById("toasticon").setAttribute("class", "fa-solid fa-triangle-exclamation");
+            } else if (tone == "loading") {
+                document.getElementById("toasticoncircle").style.backgroundColor = "black";
+                document.getElementById("toasticoncircle").style.color = "white";
+                document.getElementById("toasticon").setAttribute("class", "fa-solid fa-microchip");
+            } else if (tone == "info") {
+                document.getElementById("toasticoncircle").style.backgroundColor = "black";
+                document.getElementById("toasticoncircle").style.color = "white";
+                document.getElementById("toasticon").setAttribute("class", "fa-solid fa-bell");
+            }
+            document.getElementById("toastmessage").innerText = message.charAt(0).toUpperCase() + message.slice(1); // capitalize first letter
+            document.getElementById("toast").style.transform = "translateY(0px)";
+            document.getElementById("toast").style.opacity = "";
+            clearTimeout(closetoast);
+            closetoast = setTimeout(function(){
+                document.getElementById("toast").style.transform = "";
+                document.getElementById("toast").style.opacity = "0";
+            }, 5000);
+        }
+        function hidetoast() {
+            clearTimeout(closetoast); // prevent toast from randomly closing if opened before the timer runs out
+            document.getElementById("toast").style.transform = "";
+            document.getElementById("toast").style.opacity = "0";
+        }
+        const { createClient } = supabase;
+        const supabaseClient = createClient("https://diaduggddvncepwcwfie.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYWR1Z2dkZHZuY2Vwd2N3ZmllIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkzOTkxNTIsImV4cCI6MTk5NDk3NTE1Mn0.kVDEcViKPXoAwcVR9ACGuaiWeWas6o7RAwIqffeT-vs");
+        function widgetsback() {
+            if (document.getElementById("widgets").style.transform == "translateX(-100%)") { // depending on which widgte is in focus
+                document.getElementById("widgets").style.transform = "translateX(0px)"; // change widgets
+                document.getElementById("widgets-nav").style.transform = ""; // hide nav
+                document.getElementById("widgets-progress").style.width = ""; // reset progress bar
+            } else if (document.getElementById("widgets").style.transform == "translateX(-200%)") {
+                document.getElementById("widgets").style.transform = "translateX(-100%)";
+                document.getElementById("widgets-progress").style.width = "33%";
+                document.getElementById("widget-nav-txt").innerText = "Select a date";
+            } else if (document.getElementById("widgets").style.transform == "translateX(-300%)") {
+                document.getElementById("widgets").style.transform = "translateX(-200%)";
+                document.getElementById("widgets-progress").style.width = "66%";
+                document.getElementById("widget-nav-txt").innerText = "Select a time";
+            }
+        }
+        function calendar(location) { // open calender widget
+            document.getElementById("widgets").style.transform = "translateX(-100%)";
+            document.getElementById("widgets-nav").style.transform = "translateY(0px)";
+            document.getElementById("widget-nav-txt").innerText = "Select a date";
+            if (location == "home") { // set location idicator in nav bar
+                document.getElementById("widget-event-txt").innerText = "At your home";
+                document.getElementById("addressform").style.display = "block";
+            } else if (location == "garage") {
+                document.getElementById("widget-event-txt").innerText = "At our garage";
+                document.getElementById("addressform").style.display = "none";
+            }
+            document.getElementById("widgets-progress").style.width = "33%";
+            appointmenttype = location;
+            loadcalendar(location); // generate the actual calendar
+        }
+        function time(element) { // open time widget
+            document.getElementById("widgets").style.transform = "translateX(-200%)";
+            document.getElementById("widget-nav-txt").innerText = "Select a time";
+            document.getElementById("widgets-progress").style.width = "66%";
+            loadtime(element); // generate the actual times available
+        }
+        function closecomplete() {
+            document.getElementById("nameinput").value = ""; // clear inputs
+            document.getElementById("emailinput").value = "";
+            document.getElementById("phoneinput").value = "";
+            document.getElementById("addressinput").value = "";
+            document.getElementById("commentsinput").value = "";
+            document.getElementById("widgets").style.transform = "translateX(0%)"; // back to first widget
+        }
+        function confirmtime(button) { //animate the confirm time button
+            button.parentElement.parentElement.querySelectorAll(".timeslot").forEach(element => { //reset all other time options
+                element.style.gridTemplateColumns = "400px 0px";
+                element.style.gridGap = "0px";
+            });
+            if (button.parentElement.style.gridTemplateColumns == "194px 194px") {
+                button.parentElement.style.gridTemplateColumns = "400px 0px";
+                button.parentElement.style.gridGap = "0px";
+            } else {
+                button.parentElement.style.gridTemplateColumns = "194px 194px";
+                button.parentElement.style.gridGap = "12px";
+            }
+        }
+        function information(element) {
+            var time = element.parentElement.querySelectorAll("div")[0].getAttribute("time"); // get the time
+            document.getElementById("widgets").style.transform = "translateX(-300%)";
+            document.getElementById("widget-nav-txt").innerText = "Add your information"; // change back button text
+            document.getElementById("widgets-progress").style.width = "100%";
+            formattedtime = element.parentElement.querySelectorAll("div")[0].innerText; // get the formatted time
+            document.getElementById("infoheader").innerText = formatteddate + " • " + formattedtime; // combine date and time
+            
+            event_date = new Date(event_date.toDateString() + " " + time + ":00 GMT-0000"); // combine date and time to object
+        }
+        fetch('/config.json').then((response) => response.json()).then((json) => { // read config file
+            config = json; // set config var to config json
+        });
+        async function loadcalendar(location) {
+            document.getElementById("calendar").style.display = "none"; // hide calendar while generating
+            document.getElementById("widgets-progress").classList.add("loading"); // add buffering animation to progress bar
+            document.getElementById("calendar").innerHTML = `<span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>`; // add day names
+
+            var startrange = new Date();
+            var startrange = startrange.toISOString(); // read data from now...
+            var endrange = new Date();
+            endrange.setDate(endrange.getDate() + 28);
+            var endrange = endrange.toISOString(); // ...til here (28 days later)
+            var { data: appointments, error } = await supabaseClient.from("appointmentdates").select("date").lt("date", endrange).gt("date", startrange); // get dates from table
+            
+            var today = new Date();
+            var day = new Date();
+            day.setDate(day.getDate() - day.getDay());
+
+            for (i = 0; i < 28; i++) { // for 28 days
+                var tiledate = new Date();
+                tiledate.setDate(day.getDate() + i); // add day number
+
+                var tile = document.createElement("div"); // new square on calendar
+                tile.innerText = tiledate.getDate();
+                tile.setAttribute("onclick", "time(this)"); // add click function
+                tile.setAttribute("date", tiledate.toISOString()); // add date
+
+                if (tiledate.toISOString() < today.toISOString()) { // hide past dates
+                    tile.setAttribute("class", "hidden");
+                } else if (tiledate.toDateString() == today.toDateString()) { // highlight today
+                    tile.setAttribute("class", "today");
+                } else if (config.garage[tiledate.getDay()].length == 0 && config.home[tiledate.getDay()].length == 0) {
+                    tile.setAttribute("class", "closed"); // hide all booked days
+                } else {
+                    matchcount = 0;
+
+                    if (appointments != null) { // if there are appointments
+                        config[location][tiledate.getDay()].forEach(time => { // for every time in config
+                            appointments.forEach(appointment => { // check with appointment dates for match
+                                var appointmentdate = new Date(appointment.date);
+                                var appointmenttime = (appointmentdate.getHours() + ":" + ((appointmentdate.getMinutes()<10?'0':'') + appointmentdate.getMinutes()));
+                                if (appointmentdate.toDateString() == tiledate.toDateString() && time == appointmenttime) {
+                                    matchcount += 1;
+                                    return;
+                                }
+                            });
+                            config.datesbusy.forEach(appointment => { // check with dates busy for match
+                                var appointmentdate = new Date(appointment);
+                                var appointmenttime = (appointmentdate.getHours() + ":" + ((appointmentdate.getMinutes()<10?'0':'') + appointmentdate.getMinutes()));
+                                if (appointmentdate.toDateString() == tiledate.toDateString() && time == appointmenttime) {
+                                    matchcount += 1;
+                                    return;
+                                }
+                            });
+                        });
+                    }
+
+                    if (matchcount >= config[location][tiledate.getDay()].length) { // if match set to closed
+                        tile.setAttribute("class", "closed");
+                    } else {
+                        tile.setAttribute("class", "open");
+                    }
+                }
+
+                document.getElementById("calendar").appendChild(tile); // add square to calendar
+            }
+            document.getElementById("calendar").style.display = ""; // unhide calendar
+            document.getElementById("widgets-progress").classList.remove("loading"); // remove buffering animation from progress bar
+        }
+        async function loadtime(element) {
+            document.getElementById("timewidget").style.display = "none"; // hide widget while generating
+            document.getElementById("widgets-progress").classList.add("loading"); // add loading animation
+            event_date = new Date(element.getAttribute("date"));
+            if (event_date.getDate() == 1 || event_date.getDate() == 21 || event_date.getDate() == 31) {
+                var dateformate = event_date.getDate() + "st";
+            } else if (event_date.getDate() == 2 || event_date.getDate() == 22) {
+                var dateformate = event_date.getDate() + "nd";
+            } else if (event_date.getDate() == 3 || event_date.getDate() == 23) {
+                var dateformate = event_date.getDate() + "rd";
+            } else {
+                var dateformate = event_date.getDate() + "th";
+            }
+            formatteddate = event_date.toLocaleString('en-us', {weekday:'long'}) + ", " + event_date.toLocaleString('en-us', {month: 'long'}) + " " + dateformate;
+            document.getElementById("timewidget").innerHTML = `<div class="content1" style="color: white; margin-bottom: 22px;">${formatteddate}</div>`;
+
+            var startrange = new Date();
+            var startrange = startrange.toISOString();
+            var endrange = new Date();
+            endrange.setDate(endrange.getDate() + 28);
+            var endrange = endrange.toISOString();
+            var { data: appointments, error } = await supabaseClient.from("appointmentdates").select("date").lt("date", endrange).gt("date", startrange); // read appointment dates
+
+            config[appointmenttype][event_date.getDay()].forEach(time => { // for every available time
+                var tile = document.createElement("div"); // create time slot
+
+                var match = false;
+                if (appointments != null) { // if there are appointments
+                    appointments.forEach(appointment => { // for every appointment
+                        var appointmentdate = new Date(appointment.date);
+                        var appointmenttime = (appointmentdate.getHours() + ":" + ((appointmentdate.getMinutes()<10?'0':'') + appointmentdate.getMinutes()));
+                        if (appointmentdate.toDateString() == event_date.toDateString() && time == appointmenttime) {
+                            match = true;
+                            return;
+                        }
+                    });
+                    config.datesbusy.forEach(appointment => { // for every date busy
+                        var appointmentdate = new Date(appointment);
+                        var appointmenttime = (appointmentdate.getHours() + ":" + ((appointmentdate.getMinutes()<10?'0':'') + appointmentdate.getMinutes()));
+                        if (appointmentdate.toDateString() == event_date.toDateString() && time == appointmenttime) {
+                            match = true;
+                            return;
+                        }
+                    });
+                }
+                if (match == false) {
+                    timeclass = "opentime";
+                    timeclick = "confirmtime(this)";
+                } else { // grey out time
+                    timeclass = "closedtime";
+                    timeclick = "toast('This time is unavaible', 'warning')";
+                }
+
+                if (Number(time.substring(0, time.indexOf(":"))) >= 12) {
+                    var displaytime = (Number(time.substring(0, time.indexOf(":"))) - 12) + time.substring(time.indexOf(":"), time.length) + " PM";
+                } else {
+                    var displaytime = time + " AM";
+                } // format from 24 hours to 12
+                
+                tile.innerHTML = `
+                    <div class="${timeclass}" time="${time}" onclick="${timeclick}">${displaytime}</div>
+                    <div class="confirmtime" onclick="information(this)">Confirm</div>
+                `;
+                tile.setAttribute("class", "timeslot");
+                document.getElementById("timewidget").appendChild(tile);
+            });
+            document.getElementById("timewidget").style.display = "";
+            document.getElementById("widgets-progress").classList.remove("loading");
+        }
+        async function bookevent() {
+            document.getElementById("widgets-progress").classList.add("loading");
+            var name = document.getElementById("nameinput").value;
+            var email = document.getElementById("emailinput").value;
+            var phone = document.getElementById("phoneinput").value;
+            var comments = document.getElementById("commentsinput").value;
+
+            if (appointmenttype == "home") {
+                document.getElementById("complete-type").innerText = "At your home";
+                var address = document.getElementById("addressinput").value;
+            } else if (appointmenttype == "garage") {
+                document.getElementById("complete-type").innerText = "At our garage";
+                var address = "";
+            }
+            
+            if (name.length == 0) { // check for empty input
+                toast("Your name is missing!", "warning");
+            } else if (email.length == 0) {
+                toast("Your email address is missing!", "warning");
+            } else if (phone.length == 0) {
+                toast("Your phone number is missing!", "warning");
+            } else if (address.length == 0 && appointmenttype == "home") {
+                toast("Your address is missing!", "warning");
+            } else {
+                var startrange = new Date();
+                var startrange = startrange.toISOString();
+                var endrange = new Date();
+                endrange.setDate(endrange.getDate() + 28);
+                var endrange = endrange.toISOString();
+                var { data: appointments, problem } = await supabaseClient.from("appointmentdates").select("date").lt("date", endrange).gt("date", startrange); // read appointment dates
+
+                conflictcount = 0;
+                if (appointments != null) {
+                    appointments.forEach(appointment => { // if date is already in system, reject request
+                        var appointmentdate = new Date(appointment.date.replace("T", " ") + " GMT-0000");
+                        var appointmenttime = (appointmentdate.getHours() + ":" + ((appointmentdate.getMinutes()<10?'0':'') + appointmentdate.getMinutes()));
+                        var eventtime = (event_date.getHours() + ":" + ((event_date.getMinutes()<10?'0':'') + event_date.getMinutes()));
+                        if (appointmentdate.toDateString() == event_date.toDateString() && eventtime == appointmenttime) {
+                            conflictcount += 1;
+                            return;
+                        }
+                    });
+                }
+
+                if (conflictcount > 0) { //reject request
+                    toast("This appointment has been book>= 0ed while you were away. Please try a different date or time", "warning");
+                } else {
+                    const { data, error } = await supabaseClient.from("appointments").insert([{
+                        "date": event_date.toISOString().toLocaleString(),
+                        "name": name,
+                        "email": email,
+                        "phone": phone,
+                        "address": address,
+                        "comments": comments,
+                        "type": appointmenttype
+                    }]);
+                    document.getElementById("widgets").style.transform = "translateX(-400%)";
+                    document.getElementById("widgets-nav").style.transform = "";
+                    document.getElementById("widgets-progress").style.width = "";
+                    document.getElementById("complete-header").innerText = "Thanks, " + name;
+                    if (comments == "") {
+                        document.getElementById("details-comments").style.display = "none"; // hide comments div if there are no comments
+                    } else {
+                        document.getElementById("details-comments").style.display = "grid";
+                        document.getElementById("complete-comments").innerText = comments;
+                    }
+                    document.getElementById("complete-time").innerText = formattedtime; // add info to success page
+                    document.getElementById("complete-date").innerText = formatteddate;
+                    }
+            }
+            document.getElementById("widgets-progress").classList.remove("loading");
+        }
+    </script>
+</body>
+</html>
